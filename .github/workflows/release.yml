@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3.0.2
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.7"
+
+      - name: Upgrade pip
+        run: |
+          python -m pip install --upgrade pip
+          pip --version
+
+      - name: Install dependencies
+        run: |
+          pip install tox tox-gh-actions
+          pip install -r requirements_pypi.txt
+
+      - name: Test with tox
+        run: tox
+
+      - name: Check if there is a parent commit
+        id: check-parent-commit
+        run: |
+          echo "::set-output name=sha::$(git rev-parse --verify --quiet HEAD^)"
+
+      - name: Detect new version
+        id: check-version
+        if: steps.check-parent-commit.outputs.sha
+        uses: salsify/action-detect-and-tag-new-version@v2.0.1
+        with:
+          create-tag: false
+          version-command: |
+            bash -o pipefail -c "cat NEW_PACKAGE/VERSION | jq -r '.version'"
+
+      - name: Push tag
+        id: tag-version
+        if: steps.check-version.outputs.previous-version != steps.check-version.outputs.current-version
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ steps.check-version.outputs.current-version }}
+
+      - name: Build package
+        run: |
+          python setup.py sdist bdist_wheel
+
+      - name: Publish package on PyPI
+        if: steps.tag-version.outputs.new_tag
+        uses: pypa/gh-action-pypi-publish@v1.5.0
+        with:
+          user: __token__
+          password: "${{ secrets.PYPI_TOKEN }}"
+
+      - name: Publish the release notes
+        uses: release-drafter/release-drafter@v5.20.0
+        with:
+          publish: "${{ steps.tag-version.outputs.new_tag != '' }}"
+          tag: "${{ steps.tag-version.outputs.new_tag }}"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
