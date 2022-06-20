@@ -19,4 +19,4 @@ max-branches=30
 max-returns=8
 
 good-names=
-  NEW_PACKAGE,
+  napari-bioimage-io,

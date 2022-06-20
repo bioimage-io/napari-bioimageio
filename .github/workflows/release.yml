@@ -46,7 +46,7 @@ jobs:
         with:
           create-tag: false
           version-command: |
-            bash -o pipefail -c "cat NEW_PACKAGE/VERSION | jq -r '.version'"
+            bash -o pipefail -c "cat napari-bioimage-io/VERSION | jq -r '.version'"
 
       - name: Push tag
         id: tag-version
