@@ -20,3 +20,6 @@ max-returns=8
 
 good-names=
   bioimageio.napari,
+
+[FORMAT]
+max-line-length=120

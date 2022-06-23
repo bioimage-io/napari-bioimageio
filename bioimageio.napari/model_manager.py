@@ -1,6 +1,4 @@
-"""
-Helping library to ease interaction between napari and bioimageio.core.
-"""
+"""Helping library to ease interaction between napari and bioimageio.core."""
 
 import os
 import shutil
@@ -8,11 +6,11 @@ import json
 import urllib.request
 import urllib.error
 import glob
+import zipfile
 import yaml
 
 import bioimageio.core as bc
 import bioimageio.spec as bs
-import zipfile
 
 MODELS_DIRECTORY_DEFAULT = os.path.join(os.getcwd(), "models")
 RDF_URL_DEFAULT = 'https://raw.githubusercontent.com/bioimage-io/collection-bioimage-io/gh-pages/collection.json'
@@ -71,8 +69,8 @@ def get_model_list():
                                            'nickname': key['nickname'] if 'nickname' in key else '',
                                            'nickname_icon': key['nickname_icon'] if 'nickname_icon' in key else ''})
             result = sorted(result, key=lambda d: d['name'])
-    except urllib.error.URLError as e:
-        print(e.reason)
+    except urllib.error.URLError as excep:
+        print(excep.reason)
 
     return result
 
