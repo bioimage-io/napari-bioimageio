@@ -10,9 +10,9 @@ ROOT_DIR = Path(__file__).parent.resolve()
 README_FILE = ROOT_DIR / "README.md"
 LONG_DESCRIPTION = README_FILE.read_text(encoding="utf-8")
 VERSION_FILE = ROOT_DIR / "bioimageio.napari" / "VERSION"
-VERSION = json.loads(VERSION_FILE.read_text())["version"]
+VERSION = json.loads(VERSION_FILE.read_text(encoding="utf-8"))["version"]
 
-REQUIRES = ['bioimageio.core','PyYAML']
+REQUIRES = ['bioimageio.core', 'PyYAML']
 
 setup(
     name="bioimageio.napari",

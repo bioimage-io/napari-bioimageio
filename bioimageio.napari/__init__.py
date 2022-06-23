@@ -1,1 +1,1 @@
-"""Implement bioimageio.napari."""
+__all__ = ['model_manager']
