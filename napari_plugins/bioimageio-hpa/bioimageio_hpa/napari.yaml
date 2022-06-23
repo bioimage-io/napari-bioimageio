@@ -1,0 +1,13 @@
+name: bioimageio-hpa
+display_name: BioImageIO HPA
+
+contributions:
+  commands:
+  - id: bioimageio-hpa.QtBioimageIOHPA
+    python_name: bioimageio_hpa._bhpa:QtBioimageIOHPA
+    title: BioImageIO HPA
+
+  widgets:
+  - command: bioimageio-hpa.QtBioimageIOHPA
+    display_name: BioImageIO HPA
+    
