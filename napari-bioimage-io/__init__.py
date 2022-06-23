@@ -1,1 +1,0 @@
-"""Implement napari-bioimage-io."""

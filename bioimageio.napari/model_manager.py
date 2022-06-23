@@ -15,7 +15,7 @@ RDF_URL_DEFAULT = 'https://raw.githubusercontent.com/bioimage-io/collection-bioi
 
 
 def set_models_path(path):
-    """sets the models directory
+    """sets the models' directory
     Args:
         path: string, location of the desired models directory
     """
