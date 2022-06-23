@@ -3,6 +3,7 @@
 import os
 import shutil
 import json
+import typing
 import urllib.request
 import urllib.error
 import glob
@@ -10,13 +11,14 @@ import zipfile
 import yaml
 
 import bioimageio.core as bc
+from bioimageio.core.resource_io.nodes import ResourceDescription
 import bioimageio.spec as bs
 
 MODELS_DIRECTORY_DEFAULT = os.path.join(os.getcwd(), "models")
 RDF_URL_DEFAULT = "https://raw.githubusercontent.com/bioimage-io/collection-bioimage-io/gh-pages/collection.json"
 
 
-def set_models_path(path):
+def set_models_path(path: str) -> None:
     """Sets the models' directory.
 
     Args:
@@ -25,12 +27,12 @@ def set_models_path(path):
     os.environ["BIOIMAGEIO_NAPARI_MODELS_PATH"] = path
 
 
-def get_models_path():
+def get_models_path() -> str:
     """Gets the models directory."""
     return os.environ.get("BIOIMAGEIO_NAPARI_MODELS_PATH", MODELS_DIRECTORY_DEFAULT)
 
 
-def set_rdf_url(url):
+def set_rdf_url(url: str) -> None:
     """Sets the main RDF collection JSON url.
 
     Args:
@@ -39,12 +41,12 @@ def set_rdf_url(url):
     os.environ["BIOIMAGEIO_NAPARI_RDF_URL"] = url
 
 
-def get_rdf_url():
+def get_rdf_url() -> str:
     """Gets the main RDF collection JSON url."""
     return os.environ.get("BIOIMAGEIO_NAPARI_RDF_URL", RDF_URL_DEFAULT)
 
 
-def get_model_list():
+def get_model_list() -> typing.List[typing.Dict[str, str]]:
     """Produces a convenient python dictionary with all the available models in BioimageIO collection.
 
     For each item in the collection it creates an entry per version available with the following fields:
@@ -52,7 +54,7 @@ def get_model_list():
     Returns:
         Python dictionary with all available models information
     """
-    result = []
+    result: typing.List[typing.Dict[str, str]] = []
     try:
         rdf_url = get_rdf_url()
         with urllib.request.urlopen(rdf_url) as url:
@@ -85,7 +87,7 @@ def get_model_list():
     return result
 
 
-def get_installed_models():
+def get_installed_models() -> typing.List[typing.Dict[str, str]]:
     """Produces a convenient python dictionary with all the currently installed models.
 
     For each item in the collection it creates an entry per version available with the following fields:
@@ -93,7 +95,7 @@ def get_installed_models():
     Returns:
         Python dictionary with all available models information
     """
-    result = []
+    result: typing.List[typing.Dict[str, str]] = []
     models_directory = get_models_path()
     for file in glob.glob(models_directory + "/**/rdf.yaml", recursive=True):
         model_info = bc.load_raw_resource_description(file)
@@ -118,7 +120,7 @@ def get_installed_models():
     return result
 
 
-def install_model(model_id, model_version, overwrite):
+def install_model(model_id: str, model_version: str, overwrite: bool) -> typing.Any:
     """Installs an existing BioimageIO model in the local model folder.
 
     The model contents will be decompressed in the
@@ -156,7 +158,7 @@ def install_model(model_id, model_version, overwrite):
     return convert_model_to_yaml_string(yaml_file)
 
 
-def remove_model(model_id, model_version):
+def remove_model(model_id: str, model_version: str) -> None:
     """Removes an existing locally installed model from the local model folder.
 
     The [base model folder + model_id + model_version ('latest' if none supplied)] directory
@@ -177,7 +179,7 @@ def remove_model(model_id, model_version):
             os.rmdir(os.path.join(models_directory, str(model_id)))
 
 
-def inspect_model(model_id, model_version):
+def inspect_model(model_id: str, model_version: str) -> typing.Any:
     """Gets the information an existing BioimageIO model in the local model folder.
 
     Args:
@@ -199,7 +201,7 @@ def inspect_model(model_id, model_version):
     return None
 
 
-def load_model(model_id, model_version):
+def load_model(model_id: str, model_version: str) -> ResourceDescription:
     """Load an existing BioimageIO model in the local model folder as a BioimageIO resource.
 
     Args:
@@ -221,7 +223,7 @@ def load_model(model_id, model_version):
     return None
 
 
-def convert_model_to_yaml_string(source_file):
+def convert_model_to_yaml_string(source_file: str) -> typing.Any:
     """Convenient alternative to get the info an existing model in the local model folder from a rdf.yaml file.
 
     Args:
@@ -236,4 +238,4 @@ def convert_model_to_yaml_string(source_file):
             )
         )
 
-    return ""
+    return None
