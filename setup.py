@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, setup
 
 DESCRIPTION = "Describe the bioimageio.napari"
 
@@ -20,7 +20,7 @@ setup(
     url="https://github.com/imjoy-team/bioimageio/napari",
     author="ImJoy-Team",
     author_email="imjoy.team@gmail.com",
-    packages=find_packages(),
+    packages=find_namespace_packages(exclude=["tests", "napari_plugins"]),
     include_package_data=True,
     zip_safe=False,
     license="MIT",
