@@ -3,7 +3,7 @@ display_name: BioImage.IO Model Manager
 
 contributions:
   commands:
-  - id: bioimageio-model-manager.QtBioimageModelManager
+  - id: bioimageio-model-manager.QtBioimageIOModelManager
     python_name: bioimageio_model_manager._bmm:QtBioimageIOModelManager
     title: BioImage.IO Model Manager
 

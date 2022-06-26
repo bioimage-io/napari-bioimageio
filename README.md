@@ -57,7 +57,7 @@ It will also install this package in development mode, so that code changes are 
 - Run pytest and calculate coverage for the package.
 
   ```sh
-  pytest --cov-report term-missing --cov=bioimageio.napari
+  pytest --cov-report term-missing --cov=bioimageio/napari
   ```
 
 - Continuous integration is by default supported via [GitHub actions](https://help.github.com/en/actions). GitHub actions is free for public repositories and comes with 2000 free Ubuntu build minutes per month for private repositories.

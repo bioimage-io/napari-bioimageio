@@ -4,12 +4,12 @@ from pathlib import Path
 
 from setuptools import find_packages, setup
 
-DESCRIPTION = "Describe the bioimageio.napari."
+DESCRIPTION = "Describe the bioimageio.napari"
 
 ROOT_DIR = Path(__file__).parent.resolve()
 README_FILE = ROOT_DIR / "README.md"
 LONG_DESCRIPTION = README_FILE.read_text(encoding="utf-8")
-VERSION_FILE = ROOT_DIR / "bioimageio.napari" / "VERSION"
+VERSION_FILE = ROOT_DIR / "bioimageio" / "napari" / "VERSION"
 VERSION = json.loads(VERSION_FILE.read_text(encoding="utf-8"))["version"]
 
 REQUIRES = ["bioimageio.core", "PyYAML"]
@@ -17,7 +17,7 @@ REQUIRES = ["bioimageio.core", "PyYAML"]
 setup(
     name="bioimageio.napari",
     version=VERSION,
-    url="https://github.com/imjoy-team/bioimageio.napari",
+    url="https://github.com/imjoy-team/bioimageio/napari",
     author="ImJoy-Team",
     author_email="imjoy.team@gmail.com",
     packages=find_packages(),
