@@ -1,8 +1,7 @@
-from ._bmm import QtBioimageIOModelManager, launcher
-from . import model_manager
+from ._bmm import show_model_selector, show_model_manager, show_model_uploader
 
 __all__ = [
-    "QtBioimageIOModelManager",
-    "launcher",
-    "model_manager",
+    "show_model_selector",
+    "show_model_manager",
+    "show_model_uploader",
 ]

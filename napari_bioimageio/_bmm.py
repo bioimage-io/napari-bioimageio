@@ -1,34 +1,17 @@
 import os
 from pathlib import Path
-from qtpy.QtCore import (
-    QObject,
-    QSize,
-    Qt,
-    QThread,
-    Signal,
-)
-from qtpy.QtGui import QFont, QMovie
-from qtpy.QtWidgets import (
-    QDialog,
-    QFileDialog,
-    QFrame,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QListWidget,
-    QListWidgetItem,
-    QPushButton,
-    QSizePolicy,
-    QSplitter,
-    QTextEdit,
-    QVBoxLayout,
-    QWidget,
-)
-from superqt import QElidingLabel
-import napari.resources
-from napari._qt.qt_resources import get_stylesheet, QColoredSVGIcon
-from . import model_manager
 
+import napari.resources
+from napari._qt.qt_resources import QColoredSVGIcon, get_stylesheet
+from qtpy.QtCore import QObject, QSize, Qt, QThread, Signal
+from qtpy.QtGui import QFont, QMovie
+from qtpy.QtWidgets import (QDialog, QFileDialog, QFrame, QHBoxLayout, QLabel,
+                            QLineEdit, QListWidget, QListWidgetItem,
+                            QPushButton, QSizePolicy, QSplitter, QTextEdit,
+                            QVBoxLayout, QWidget)
+from superqt import QElidingLabel
+
+from . import _utils
 
 # TODO find a proper way to import style from napari
 custom_style = (
@@ -72,7 +55,6 @@ QtModelInfo > QTextEdit{
 
 class Installer(QObject):
     model_id = ""
-    model_version = ""
     filter_text = ""
     inspect_data = ""
     already_installed = {}
@@ -89,7 +71,7 @@ class Installer(QObject):
         self,
     ):
         try:
-            model_manager.install_model(self.model_id, self.model_version, True)
+            _utils.install_model(self.model_id, True)
         except Exception as e:
             print("Could not install model:", str(e))
             self.exit_code = -1
@@ -100,7 +82,7 @@ class Installer(QObject):
         self,
     ):
         try:
-            model_manager.remove_model(self.model_id, self.model_version)
+            _utils.remove_model(self.model_id)
         except Exception as e:
             print("Could not remove model:", str(e))
             self.exit_code = -1
@@ -112,7 +94,7 @@ class Installer(QObject):
     ):
         try:
             self.inspect_data = str(
-                model_manager.inspect_model(self.model_id, self.model_version)
+                _utils.inspect_model(self.model_id)
             )
         except Exception as e:
             print("Could not inspect model:", str(e))
@@ -125,15 +107,15 @@ class Installer(QObject):
     ):
         self.already_installed = {}
         self.ready_to_install = {}
-        model_list = model_manager.get_installed_models()
+        model_list = _utils.get_installed_models()
         for curr_model in model_list:
             if self.filter_text == "":
                 self.already_installed[
-                    curr_model["id"] + "/" + curr_model["version"]
+                    curr_model["id"]
                 ] = curr_model
             else:
                 model_key = (
-                    str(curr_model["id"]) + "/" + str(curr_model["version"]).lower()
+                    str(curr_model["id"]).lower()
                 )
                 for curr_filter in self.filter_text.split(";"):
                     if (
@@ -143,19 +125,19 @@ class Installer(QObject):
                         or curr_filter.lower() in model_key
                     ):
                         self.already_installed[
-                            curr_model["id"] + "/" + curr_model["version"]
+                            curr_model["id"]
                         ] = curr_model
                         break
 
-        model_list = model_manager.get_model_list()
+        model_list = _utils.get_model_list()
         for curr_model in model_list:
             if self.filter_text == "":
                 self.ready_to_install[
-                    curr_model["id"] + "/" + curr_model["version"]
+                    curr_model["id"]
                 ] = curr_model
             else:
                 model_key = (
-                    str(curr_model["id"]) + "/" + str(curr_model["version"]).lower()
+                    str(curr_model["id"]).lower()
                 )
                 for curr_filter in self.filter_text.split(";"):
                     if (
@@ -165,7 +147,7 @@ class Installer(QObject):
                         or curr_filter.lower() in model_key
                     ):
                         self.ready_to_install[
-                            curr_model["id"] + "/" + curr_model["version"]
+                            curr_model["id"]
                         ] = curr_model
                         break
 
@@ -196,25 +178,24 @@ class QtModelListItem(QFrame):
     def __init__(
         self,
         model_id,
-        model_version,
         model_name,
         model_description,
         model_nickname_icon,
         installed,
         parent: QWidget = None,
-        selection=False,
+        select_mode=False,
     ):
         super().__init__(parent)
         self.model_id = model_id
-        self.model_version = model_version
         self.model_name = model_name
         self.model_description = model_description
         self.model_nickname_icon = model_nickname_icon
         self.model_installed = installed
-        self.selection = selection
+        self.select_mode = select_mode
 
         self.setup_ui()
 
+        model_version = self.model_id[(self.model_id.rfind("/") + 1) :]
         self.ui_name.setText(model_nickname_icon + " " + model_name)
         self.ui_description.setText(model_description)
         self.ui_version.setText(str(model_version))
@@ -257,7 +238,7 @@ class QtModelListItem(QFrame):
             icon = QColoredSVGIcon.from_resources("zoom")
             self.inspect_icon.setIcon(icon.colored(color="#33F0FF"))
             self.row1.addWidget(self.inspect_icon)
-            if self.selection:
+            if self.select_mode:
                 self.selection_button = QPushButton(self)
                 sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
                 sizePolicy.setHorizontalStretch(0)
@@ -301,10 +282,10 @@ class QtModelListItem(QFrame):
 
 
 class QtModelList(QListWidget):
-    def __init__(self, parent, ui_parent, selection):
+    def __init__(self, parent, ui_parent, select_mode):
         super().__init__(parent)
         self.ui_parent = ui_parent
-        self.selection = selection
+        self.select_mode = select_mode
         self.setSortingEnabled(True)
 
     def addItem(
@@ -313,81 +294,79 @@ class QtModelList(QListWidget):
         installed,
     ):
         item = QListWidgetItem(
-            str(model_info["id"]) + str(model_info["version"]), parent=self
+            str(model_info["id"]), parent=self
         )
         super().addItem(item)
         widg = QtModelListItem(
             model_id=model_info["id"],
-            model_version=model_info["version"],
             model_name=model_info["name"],
             model_description=model_info["description"],
             model_nickname_icon=model_info["nickname_icon"],
             installed=installed,
             parent=self,
-            selection=self.selection,
+            select_mode=self.select_mode,
         )
 
         item.widget = widg
         action_name = "uninstall" if installed == 2 else "install"
         widg.action_button.clicked.connect(
             lambda: self.handle_action(
-                item, model_info["id"], model_info["version"], action_name
+                item, model_info, action_name
             )
         )
         if installed == 2:
             widg.inspect_icon.clicked.connect(
                 lambda: self.handle_action(
-                    item, model_info["id"], model_info["version"], "inspect"
+                    item, model_info, "inspect"
                 )
             )
-        if installed == 2 and self.selection:
+        if installed == 2 and self.select_mode:
             widg.selection_button.clicked.connect(
                 lambda: self.handle_action(
-                    item, model_info["id"], model_info["version"], "select"
+                    item, model_info, "select"
                 )
             )
         item.setSizeHint(widg.sizeHint())
         self.setItemWidget(item, widg)
 
-    def handle_action(self, item, model_id, model_version, action_name):
-        widget = item.widget
-
+    def handle_action(self, item, model_info, action_name):
         if action_name == "install":
-            self.ui_parent.run_thread("install", model_id, model_version)
+            self.ui_parent.run_thread("install", model_info)
         elif action_name == "uninstall":
-            self.ui_parent.run_thread("uninstall", model_id, model_version)
+            self.ui_parent.run_thread("uninstall", model_info)
         elif action_name == "inspect":
-            self.ui_parent.run_thread("inspect", model_id, model_version)
+            self.ui_parent.run_thread("inspect", model_info)
         elif action_name == "select":
-            self.ui_parent.run_thread("select", model_id, model_version)
+            self.ui_parent.run_thread("select", model_info)
 
 
 class QtBioimageIOModelManager(QDialog):
-    def __init__(self, parent=None, prefilter="", selection=False):
+    def __init__(self, parent=None, filter=None, select_mode=False):
         super().__init__(parent)
         self.setStyleSheet(custom_style)
-        self.models_folder = model_manager.get_models_path()
+        self.models_folder = _utils.get_models_path()
         if not os.path.exists(self.models_folder):
             self.models_folder = os.getcwd()
-            model_manager.set_models_path(self.models_folder)
+            _utils.set_models_path(self.models_folder)
         self.RUNNING = False
-        self.selection = selection
+        self.select_mode = select_mode
+        self.selected = None
         self.setup_ui()
-        if prefilter != "":
-            self.filter.setText(prefilter)
+        if filter:
+            self.filter.setText(filter)
             self.filter.setReadOnly(True)
             self.filter.setEnabled(False)
         else:
-            self.run_thread("refresh", "", "")
+            self.run_thread("refresh", None)
 
-    def run_thread(self, action_name, model_id, model_version):
+    def run_thread(self, action_name, model_info=None):
+        if model_info:
+            model_id = model_info["id"]
+        else:
+            model_id = ""
         if self.RUNNING == False:
             if action_name == "select":
-                self.parent().select_bioimageio_model(
-                    str(model_id) + ("/" + str(model_version))
-                    if str(model_version) != ""
-                    else ""
-                )
+                self.selected = model_info
                 self.close()
                 return
 
@@ -398,7 +377,6 @@ class QtBioimageIOModelManager(QDialog):
             self.worker.moveToThread(self.thread)
 
             self.worker.model_id = model_id
-            self.worker.model_version = model_version
             self.worker.filter_text = self.filter.text()
             if action_name == "install":
                 self.thread.started.connect(self.worker.install)
@@ -494,7 +472,7 @@ class QtBioimageIOModelManager(QDialog):
         self.filter.setPlaceholderText("filter...")
         self.filter.setMaximumWidth(350)
         self.filter.setClearButtonEnabled(True)
-        self.filter.textChanged.connect(lambda: self.run_thread("refresh", "", ""))
+        self.filter.textChanged.connect(lambda: self.run_thread("refresh"))
         filterBox.addWidget(self.filter)
         filterBox.addStretch()
         vlay_1.addLayout(filterBox)
@@ -514,7 +492,7 @@ class QtBioimageIOModelManager(QDialog):
         mid_layout.addWidget(self.installed_label)
         mid_layout.addStretch()
         lay.addLayout(mid_layout)
-        self.installed_list = QtModelList(installed, self, self.selection)
+        self.installed_list = QtModelList(installed, self, self.select_mode)
         lay.addWidget(self.installed_list)
 
         available = QWidget(self.v_splitter)
@@ -538,15 +516,27 @@ class QtBioimageIOModelManager(QDialog):
 
         if dlg.exec_():
             filenames = dlg.selectedFiles()
-            model_manager.set_models_path(filenames[0])
-            self.models_folder = model_manager.get_models_path()
+            _utils.set_models_path(filenames[0])
+            self.models_folder = _utils.get_models_path()
             self.modfol_value.setText(self.models_folder)
-            self.run_thread("refresh", "", "")
+            self.run_thread("refresh")
 
 
-def launcher(parent=None, model_filter="", static_filter=False):
-    d = QtBioimageIOModelManager(parent, model_filter, static_filter)
+def show_model_selector(filter=""):
+    d = QtBioimageIOModelManager(filter=filter, select_mode=True)
     d.setObjectName("QtBioimageIOModelManager")
     d.setWindowTitle("Bioimage model manager")
     d.setWindowModality(Qt.ApplicationModal)
     d.exec_()
+    return d.selected
+
+def show_model_manager():
+    d = QtBioimageIOModelManager(select_mode=False)
+    d.setObjectName("QtBioimageIOModelManager")
+    d.setWindowTitle("Bioimage model manager")
+    d.setWindowModality(Qt.ApplicationModal)
+    d.exec_()
+    
+
+def show_model_uploader():
+    raise NotImplementedError

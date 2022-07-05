@@ -1,18 +1,18 @@
 """Helping library to ease interaction between napari and bioimageio.core."""
 
+import glob
+import json
 import os
 import shutil
-import json
 import typing
-import urllib.request
 import urllib.error
-import glob
+import urllib.request
 import zipfile
-import yaml
 
-import bioimageio.core as bc
+import bioimageio.core
+import bioimageio.spec
+import yaml
 from bioimageio.core.resource_io.nodes import ResourceDescription
-import bioimageio.spec as bs
 
 MODELS_DIRECTORY_DEFAULT = os.path.join(os.getcwd(), "bioimageio-models")
 RDF_URL_DEFAULT = "https://raw.githubusercontent.com/bioimage-io/collection-bioimage-io/gh-pages/collection.json"
@@ -67,8 +67,8 @@ def get_model_list() -> typing.List[typing.Dict[str, str]]:
                                 {
                                     "name": key["name"],
                                     "description": key["description"],
-                                    "id": key["id"],
-                                    "version": version,
+                                    "id": key["id"] + "/" + version,
+                                    # "version": version,
                                     "tags": ",".join(
                                         key["tags"] if "tags" in key else ""
                                     ),
@@ -98,13 +98,13 @@ def get_installed_models() -> typing.List[typing.Dict[str, str]]:
     result: typing.List[typing.Dict[str, str]] = []
     models_directory = get_models_path()
     for file in glob.glob(models_directory + "/**/rdf.yaml", recursive=True):
-        model_info = bc.load_raw_resource_description(file)
+        model_info = bioimageio.core.load_raw_resource_description(file)
         result.append(
             {
                 "name": model_info.name,
                 "description": model_info.description,
-                "id": model_info.id[: (model_info.id.rfind("/"))],
-                "version": model_info.id[(model_info.id.rfind("/") + 1) :],
+                "id": model_info.id,
+                # "version": model_info.id[(model_info.id.rfind("/") + 1) :],
                 "tags": ",".join(model_info.tags),
                 "nickname": model_info.config["bioimageio"]["nickname"]
                 if "nickname" in model_info.config["bioimageio"]
@@ -120,14 +120,13 @@ def get_installed_models() -> typing.List[typing.Dict[str, str]]:
     return result
 
 
-def install_model(model_id: str, model_version: str, overwrite: bool) -> typing.Any:
+def install_model(model_id: str, overwrite: bool) -> typing.Any:
     """Installs an existing BioimageIO model in the local model folder.
 
     The model contents will be decompressed in the
-        [base model folder + model_id + model_version ('latest' if none supplied)] directory
+        [base model folder + model_id] directory
     Args:
         model_id: string, id of the model
-        model_version: string, version of the model
         overwrite: bool, true to force re-install
     Returns:
         String in YAML format with the full model information
@@ -135,8 +134,7 @@ def install_model(model_id: str, model_version: str, overwrite: bool) -> typing.
     models_directory = get_models_path()
     install_folder = os.path.join(
         models_directory,
-        str(model_id),
-        str(model_version) if model_version is not None else "latest",
+        str(model_id)
     )
     destination_file = os.path.join(install_folder, "model.zip")
     yaml_file = os.path.join(install_folder, "rdf.yaml")
@@ -148,9 +146,7 @@ def install_model(model_id: str, model_version: str, overwrite: bool) -> typing.
 
     os.makedirs(install_folder)
     resource_description = str(model_id)
-    if model_version is not None and str(model_version) != "":
-        resource_description = resource_description + "/" + str(model_version)
-    bc.export_resource_package(resource_description, output_path=destination_file)
+    bioimageio.core.export_resource_package(resource_description, output_path=destination_file)
     with zipfile.ZipFile(destination_file, "r") as zip_ref:
         zip_ref.extractall(install_folder)
     os.remove(destination_file)
@@ -158,20 +154,18 @@ def install_model(model_id: str, model_version: str, overwrite: bool) -> typing.
     return convert_model_to_yaml_string(yaml_file)
 
 
-def remove_model(model_id: str, model_version: str) -> None:
+def remove_model(model_id: str) -> None:
     """Removes an existing locally installed model from the local model folder.
 
-    The [base model folder + model_id + model_version ('latest' if none supplied)] directory
+    The [base model folder + model_id] directory
         and all its contents will be removed
     Args:
         model_id: string, id of the model
-        model_version: string, version of the model
     """
     models_directory = get_models_path()
     install_folder = os.path.join(
         models_directory,
         str(model_id),
-        str(model_version) if model_version is not None else "latest",
     )
     if os.path.exists(install_folder):
         shutil.rmtree(install_folder)
@@ -179,12 +173,11 @@ def remove_model(model_id: str, model_version: str) -> None:
             os.rmdir(os.path.join(models_directory, str(model_id)))
 
 
-def inspect_model(model_id: str, model_version: str) -> typing.Any:
+def inspect_model(model_id: str) -> typing.Any:
     """Gets the information an existing BioimageIO model in the local model folder.
 
     Args:
         model_id: string, id of the model
-        model_version: string, version of the model
     Returns:
         String in YAML format with the full model information
     """
@@ -192,7 +185,6 @@ def inspect_model(model_id: str, model_version: str) -> typing.Any:
     install_folder = os.path.join(
         models_directory,
         str(model_id),
-        str(model_version) if model_version is not None else "latest",
     )
     destination_file = os.path.join(install_folder, "rdf.yaml")
     if os.path.exists(install_folder):
@@ -201,12 +193,11 @@ def inspect_model(model_id: str, model_version: str) -> typing.Any:
     return None
 
 
-def load_model(model_id: str, model_version: str) -> ResourceDescription:
+def load_model(model_id: str) -> ResourceDescription:
     """Load an existing BioimageIO model in the local model folder as a BioimageIO resource.
 
     Args:
         model_id: string, id of the model
-        model_version: string, version of the model
     Returns:
         BioImage.IO resource
     """
@@ -214,11 +205,10 @@ def load_model(model_id: str, model_version: str) -> ResourceDescription:
     install_folder = os.path.join(
         models_directory,
         str(model_id),
-        str(model_version) if model_version is not None else "latest",
     )
     destination_file = os.path.join(install_folder, "rdf.yaml")
     if os.path.exists(install_folder):
-        return bc.load_resource_description(destination_file)
+        return bioimageio.core.load_resource_description(destination_file)
 
     return None
 
@@ -233,8 +223,8 @@ def convert_model_to_yaml_string(source_file: str) -> typing.Any:
     """
     if os.path.exists(source_file):
         return yaml.dump(
-            bs.serialize_raw_resource_description_to_dict(
-                bc.load_raw_resource_description(source_file)
+            bioimageio.spec.serialize_raw_resource_description_to_dict(
+                bioimageio.core.load_raw_resource_description(source_file)
             )
         )
 

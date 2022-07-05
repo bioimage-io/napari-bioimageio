@@ -5,7 +5,7 @@ napari plugin for managing AI models in the BioImage Model Zoo.
 ## Installation
 
 ```
-pip install napari PyQt5 bioimageio.napari
+pip install napari[pyqt5] bioimageio.napari
 ```
 
 ## Development
