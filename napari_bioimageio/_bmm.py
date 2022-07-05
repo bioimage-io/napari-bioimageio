@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from qtpy.QtCore import (
     QObject,
-    QProcess,
     QSize,
     Qt,
     QThread,
@@ -10,7 +9,6 @@ from qtpy.QtCore import (
 )
 from qtpy.QtGui import QFont, QMovie
 from qtpy.QtWidgets import (
-    QCheckBox,
     QDialog,
     QFileDialog,
     QFrame,

@@ -14,7 +14,7 @@ import bioimageio.core as bc
 from bioimageio.core.resource_io.nodes import ResourceDescription
 import bioimageio.spec as bs
 
-MODELS_DIRECTORY_DEFAULT = os.path.join(os.getcwd(), "models")
+MODELS_DIRECTORY_DEFAULT = os.path.join(os.getcwd(), "bioimageio-models")
 RDF_URL_DEFAULT = "https://raw.githubusercontent.com/bioimage-io/collection-bioimage-io/gh-pages/collection.json"
 
 
