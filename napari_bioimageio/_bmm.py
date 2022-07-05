@@ -29,7 +29,7 @@ from qtpy.QtWidgets import (
 from superqt import QElidingLabel
 import napari.resources
 from napari._qt.qt_resources import get_stylesheet, QColoredSVGIcon
-from bioimageio.napari import model_manager
+from . import model_manager
 
 
 # TODO find a proper way to import style from napari

@@ -19,8 +19,7 @@ import napari.resources
 from napari.utils.notifications import show_info, show_error as notify_error
 from napari._qt.qt_resources import get_stylesheet, QColoredSVGIcon
 import bioimageio.core as bc
-from bioimageio.napari import model_manager
-from bioimageio_model_manager import launcher
+from napari_bioimageio import launcher, model_manager
 
 import numpy as np
 from skimage.measure import regionprops, label
