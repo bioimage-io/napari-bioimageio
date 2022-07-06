@@ -1,0 +1,13 @@
+name: napari-bioimageio
+display_name: BioImage.IO Model Manager
+
+contributions:
+  commands:
+  - id: napari-bioimageio.QtBioImageIOModelManager
+    python_name: napari_bioimageio._bmm:QtBioImageIOModelManager
+    title: BioImage.IO Model Manager
+
+  widgets:
+  - command: napari-bioimageio.QtBioImageIOModelManager 
+    display_name: BioImage.IO Model Manager
+    

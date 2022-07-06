@@ -1,9 +1,15 @@
 import os
 from pathlib import Path
-from qtpy.QtCore import (
-    QObject,
-    Qt,
-)
+
+import bioimageio.core
+import napari
+import napari.resources
+import numpy as np
+from napari._qt.qt_resources import QColoredSVGIcon, get_stylesheet
+from napari.utils.notifications import show_error as notify_error
+from napari.utils.notifications import show_info
+from napari_bioimageio import show_model_selector, show_model_manager
+from qtpy.QtCore import QObject, Qt
 from qtpy.QtGui import QFont, QMovie
 from qtpy.QtWidgets import (
     QComboBox,
@@ -14,20 +20,10 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-import napari
-import napari.resources
-from napari.utils.notifications import show_info, show_error as notify_error
-from napari._qt.qt_resources import get_stylesheet, QColoredSVGIcon
-import bioimageio.core as bc
-from bioimageio.napari import model_manager
-from bioimageio_model_manager import launcher
-
-import numpy as np
-from skimage.measure import regionprops, label
+from skimage.measure import label, regionprops
 from skimage.segmentation import watershed
 from skimage.transform import rescale, resize
 from xarray import DataArray
-
 
 HPA_CLASSES = {
     "Nucleoplasm": 0,
@@ -87,7 +83,7 @@ classification_model_filter = "10.5281/zenodo.5910854"
 custom_style = get_stylesheet("dark")
 
 
-class QtBioimageIOHPA(QDialog):
+class QtBioImageIOHPA(QDialog):
     def __init__(self, viewer: "napari.viewer.Viewer"):
         super().__init__()
         self._viewer = viewer
@@ -96,14 +92,11 @@ class QtBioimageIOHPA(QDialog):
         self.image2_layer = ""
         self.image3_layer = ""
         self.image4_layer = ""
-        self.nucseg_model_id = ""
-        self.nucseg_model_version = ""
+        self.nucseg_model_source = ""
         self.nucseg_id = "None"
-        self.celseg_model_id = ""
-        self.celseg_model_version = ""
+        self.celseg_model_source = ""
         self.celseg_id = "None"
-        self.classi_model_id = ""
-        self.classi_model_version = ""
+        self.classi_model_source = ""
         self.classi_id = "None"
 
         self.setup_ui()
@@ -171,14 +164,31 @@ class QtBioimageIOHPA(QDialog):
         modelsTitle_label = QLabel("Models:")
         modelsTitleBox.addWidget(modelsTitle_label)
         modelsTitleBox.addStretch()
+
+        manager_btn = QPushButton("Show Models")
+
+        def show_models():
+            show_model_manager()
+
+        manager_btn.clicked.connect(show_models)
+        modelsTitleBox.addWidget(manager_btn)
+
         modelsTitleBox.setContentsMargins(10, 15, 10, 0)
         self.layout.addLayout(modelsTitleBox)
 
         nucsegBox = QHBoxLayout()
         nucseg_label = QLabel("Nucleus segmentation:")
         self.nucseg_value = QLabel(self.nucseg_id)
-        nucseg_value_btn = QPushButton("Change")
-        nucseg_value_btn.clicked.connect(lambda: self.get_model_file("nucseg"))
+        nucseg_value_btn = QPushButton("Select")
+
+        def select_model():
+            model_info = show_model_selector(filter=nuclear_segmentation_model_filter)
+            if model_info:
+                self.nucseg_model_source = model_info["rdf_source"]
+                self.nucseg_id = model_info["nickname"]
+                self.nucseg_value.setText(model_info["nickname"])
+
+        nucseg_value_btn.clicked.connect(select_model)
         nucsegBox.addWidget(nucseg_label)
         nucsegBox.addSpacing(10)
         nucsegBox.addWidget(self.nucseg_value)
@@ -191,8 +201,16 @@ class QtBioimageIOHPA(QDialog):
         celsegBox = QHBoxLayout()
         celseg_label = QLabel("Cell segmentation:")
         self.celseg_value = QLabel(self.celseg_id)
-        celseg_value_btn = QPushButton("Change")
-        celseg_value_btn.clicked.connect(lambda: self.get_model_file("celseg"))
+        celseg_value_btn = QPushButton("Select")
+
+        def select_model():
+            model_info = show_model_selector(filter=cell_segmentation_model_filter)
+            if model_info:
+                self.celseg_model_source = model_info["rdf_source"]
+                self.celseg_id = model_info["nickname"]
+                self.celseg_value.setText(model_info["nickname"])
+
+        celseg_value_btn.clicked.connect(select_model)
         celsegBox.addWidget(celseg_label)
         celsegBox.addSpacing(10)
         celsegBox.addWidget(self.celseg_value)
@@ -205,8 +223,16 @@ class QtBioimageIOHPA(QDialog):
         classiBox = QHBoxLayout()
         classi_label = QLabel("Classification:")
         self.classi_value = QLabel(self.classi_id)
-        classi_value_btn = QPushButton("Change")
-        classi_value_btn.clicked.connect(lambda: self.get_model_file("classi"))
+        classi_value_btn = QPushButton("Select")
+
+        def select_model():
+            model_info = show_model_selector(filter=classification_model_filter)
+            if model_info:
+                self.classi_model_source = model_info["rdf_source"]
+                self.classi_id = model_info["nickname"]
+                self.classi_value.setText(model_info["nickname"])
+
+        classi_value_btn.clicked.connect(select_model)
         classiBox.addWidget(classi_label)
         classiBox.addSpacing(10)
         classiBox.addWidget(self.classi_value)
@@ -227,34 +253,6 @@ class QtBioimageIOHPA(QDialog):
         self.layout.addStretch()
         self.setLayout(self.layout)
 
-    def select_bioimageio_model(self, selected_model):
-        model_id = selected_model[: (selected_model.rfind("/"))]
-        model_version = selected_model[(selected_model.rfind("/") + 1) :]
-        if self.model_selected == "nucseg":
-            self.nucseg_model_id = model_id
-            self.nucseg_model_version = model_version
-            self.nucseg_id = model_id + "/" + model_version
-            self.nucseg_value.setText(self.nucseg_id)
-        elif self.model_selected == "celseg":
-            self.celseg_model_id = model_id
-            self.celseg_model_version = model_version
-            self.celseg_id = model_id + "/" + model_version
-            self.celseg_value.setText(self.celseg_id)
-        elif self.model_selected == "classi":
-            self.classi_model_id = model_id
-            self.classi_model_version = model_version
-            self.classi_id = model_id + "/" + model_version
-            self.classi_value.setText(self.classi_id)
-
-    def get_model_file(self, model_type):
-        self.model_selected = model_type
-        model_filter = nuclear_segmentation_model_filter
-        if model_type == "celseg":
-            model_filter = cell_segmentation_model_filter
-        elif model_type == "classi":
-            model_filter = classification_model_filter
-        launcher(parent=self, model_filter=model_filter, static_filter=True)
-
     def run_model(self):
         if self.cb_1.currentText() == "None":
             notify_error("Please select a valid Nucleus image layer")
@@ -268,13 +266,13 @@ class QtBioimageIOHPA(QDialog):
         if self.cb_4.currentText() == "None":
             notify_error("Please select a valid target protein image layer")
             return
-        if self.nucseg_model_id == "":
+        if self.nucseg_model_source == "":
             notify_error("Please select a valid nucleus segmentation model")
             return
-        if self.celseg_model_id == "":
+        if self.celseg_model_source == "":
             notify_error("Please select a valid cell segmentation model")
             return
-        if self.classi_model_id == "":
+        if self.classi_model_source == "":
             notify_error("Please select a valid classification model")
             return
 
@@ -291,20 +289,20 @@ class QtBioimageIOHPA(QDialog):
         cell_segmentation = None
         prediction_pkl = None
 
-        run_nucleus_model = model_manager.load_model(
-            self.nucseg_model_id, self.nucseg_model_version
+        run_nucleus_model = bioimageio.core.load_resource_description(
+            self.nucseg_model_source
         )
-        run_cell_model = model_manager.load_model(
-            self.celseg_model_id, self.celseg_model_version
+        run_cell_model = bioimageio.core.load_resource_description(
+            self.celseg_model_source
         )
-        run_classification_model = model_manager.load_model(
-            self.classi_model_id, self.classi_model_version
+        run_classification_model = bioimageio.core.load_resource_description(
+            self.classi_model_source
         )
 
         axes = run_cell_model.inputs[0].axes
         channels = ["red", "blue", "green"]
         padding = {"x": 32, "y": 32}
-        scale_factor = 0.25
+        scale_factor = 1
 
         def load_image(channels, scale_factor=None):
             image = []
@@ -333,7 +331,7 @@ class QtBioimageIOHPA(QDialog):
                 np.concatenate([image[1:2], image[1:2], image[1:2]], axis=0)[None],
                 dims=axes,
             )
-            nuclei_pred = bc.prediction.predict_with_padding(
+            nuclei_pred = bioimageio.core.prediction.predict_with_padding(
                 pp_nucleus, input_nucleus, padding=padding
             )[0].values[0]
 
@@ -353,7 +351,7 @@ class QtBioimageIOHPA(QDialog):
 
             # run prediction with the cell segmentation model
             input_cells = DataArray(image[None], dims=axes)
-            cell_pred = bc.prediction.predict_with_padding(
+            cell_pred = bioimageio.core.prediction.predict_with_padding(
                 pp_cell, input_cells, padding=padding
             )[0].values[0]
             # segment the cells
@@ -371,8 +369,10 @@ class QtBioimageIOHPA(QDialog):
             ).astype(cell_seg.dtype)
             return cell_seg
 
-        with bc.create_prediction_pipeline(bioimageio_model=run_cell_model) as pp_cell:
-            with bc.create_prediction_pipeline(
+        with bioimageio.core.create_prediction_pipeline(
+            bioimageio_model=run_cell_model
+        ) as pp_cell:
+            with bioimageio.core.create_prediction_pipeline(
                 bioimageio_model=run_nucleus_model
             ) as pp_nucleus:
                 cell_segmentation = _segment(pp_cell, pp_nucleus)
@@ -418,7 +418,7 @@ class QtBioimageIOHPA(QDialog):
 
             return predictions
 
-        with bc.create_prediction_pipeline(
+        with bioimageio.core.create_prediction_pipeline(
             bioimageio_model=run_classification_model
         ) as pp:
             prediction_pkl = _classifiy(pp, cell_segmentation)
