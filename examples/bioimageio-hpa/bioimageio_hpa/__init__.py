@@ -1,5 +1,5 @@
-from ._bhpa import QtBioimageIOHPA
+from ._bhpa import QtBioImageIOHPA
 
 __all__ = [
-    "QtBioimageIOHPA",
+    "QtBioImageIOHPA",
 ]

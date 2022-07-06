@@ -3,11 +3,11 @@ display_name: BioImageIO HPA
 
 contributions:
   commands:
-  - id: bioimageio-hpa.QtBioimageIOHPA
-    python_name: bioimageio_hpa._bhpa:QtBioimageIOHPA
+  - id: bioimageio-hpa.QtBioImageIOHPA
+    python_name: bioimageio_hpa._bhpa:QtBioImageIOHPA
     title: BioImageIO HPA
 
   widgets:
-  - command: bioimageio-hpa.QtBioimageIOHPA
+  - command: bioimageio-hpa.QtBioImageIOHPA
     display_name: BioImageIO HPA
     

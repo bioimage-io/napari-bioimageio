@@ -5,9 +5,26 @@ napari plugin for managing AI models in the BioImage Model Zoo.
 ## Installation
 
 ```
-pip install napari[pyqt5] bioimageio.napari
+pip install napari[pyqt5] napari-bioimageio
 ```
 
+## Usage
+
+This library is meant for helping developers to ease the handling of models in napari.
+
+We provide a set of API functions for managing and selecting models.
+
+### `show_model_manager()`
+Show the model manager with a model list pulled from the BioImage Model Zoo, the user can explore all the available models, download or remove models.
+
+### `show_model_selector(filter=None)`
+Display a dialog for selecting models from the BioImage Model Zoo, the user can either select an existing model or download from the BioImage Model Zoo.
+
+The selecte model information (a dictionary) will be returned if the user selected a model, otherwise it returns `None`.
+### `show_model_uploader()`
+
+Display a dialog to instruct the user to upload a model to the BioImage Model Zoo.
+Currently, it only shows a message, in the future, we will try to support direct uploading with user's credentials obtained from Zenodo (a public data repository used by the BioImage Model Zoo to store models).
 ## Development
 
 - Install and set up development environment.
