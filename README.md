@@ -43,6 +43,8 @@ if model_info:
 ```
 
 For more examples, see [this example notebook](https://github.com/bioimage-io/core-bioimage-io-python/blob/main/example/bioimageio-core-usage.ipynb) for `bioimageio.core`.
+
+You can also access the weight files directly by searching the model folder (e.g. extract the model folder path via `os.path.dirname(model_description["rdf_source"])`), this will be useful if you prefer to use your own model inference logic.
 ### `show_model_uploader()`
 Display a dialog to instruct the user to upload a model package to the BioImage Model Zoo.
 Currently, it only shows a message, in the future, we will try to support direct uploading with user's credentials obtained from Zenodo (a public data repository used by the BioImage Model Zoo to store models).
