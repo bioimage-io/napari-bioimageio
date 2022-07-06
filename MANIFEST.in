@@ -1,6 +1,6 @@
 include LICENSE
 include README.md
-include napari-bioimageio/VERSION
+include napari_bioimageio/VERSION
 exclude requirements*.txt
 exclude .*
 exclude pylintrc
