@@ -25,6 +25,26 @@ The selecte model information (a dictionary) will be returned if the user select
 
 Display a dialog to instruct the user to upload a model to the BioImage Model Zoo.
 Currently, it only shows a message, in the future, we will try to support direct uploading with user's credentials obtained from Zenodo (a public data repository used by the BioImage Model Zoo to store models).
+
+
+### Example usage
+```python
+# Popup a model selection dialog for choosing the model
+model_info = show_model_selector(filter=nuclear_segmentation_model_filter)
+
+if model_info:
+  self.nucseg_model_source = model_info["rdf_source"]
+  # Load model 
+  model_description = bioimageio.core.load_resource_description(model_info["rdf_source"])
+  input_image = imageio.imread("./my-image.tif")
+
+  with bioimageio.core.create_prediction_pipeline(
+      bioimageio_model=model_description
+  ) as pipeline:
+    output_image = bioimageio.core.prediction.predict_with_padding(
+        pipeline, input_image, padding=padding
+    )
+```
 ## Development
 
 - Install and set up development environment.
