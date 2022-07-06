@@ -5,10 +5,24 @@ import napari.resources
 from napari._qt.qt_resources import QColoredSVGIcon, get_stylesheet
 from qtpy.QtCore import QObject, QSize, Qt, QThread, Signal
 from qtpy.QtGui import QFont, QMovie
-from qtpy.QtWidgets import (QDialog, QFileDialog, QFrame, QHBoxLayout, QLabel,
-                            QLineEdit, QListWidget, QListWidgetItem,
-                            QPushButton, QSizePolicy, QSplitter, QTextEdit,
-                            QVBoxLayout, QWidget, QComboBox, QMessageBox)
+from qtpy.QtWidgets import (
+    QDialog,
+    QFileDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QPushButton,
+    QSizePolicy,
+    QSplitter,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+    QComboBox,
+    QMessageBox,
+)
 from superqt import QElidingLabel
 
 from . import _utils
@@ -93,9 +107,7 @@ class Downloader(QObject):
         self,
     ):
         try:
-            self.inspect_data = str(
-                _utils.inspect_model(self.model_info["rdf_source"])
-            )
+            self.inspect_data = str(_utils.inspect_model(self.model_info["rdf_source"]))
         except Exception as e:
             print("Could not inspect model:", str(e))
             self.exit_code = -1
@@ -110,13 +122,9 @@ class Downloader(QObject):
             filters = filter
         for curr_model in models:
             if filter == "":
-                filtered[
-                    curr_model["id"]
-                ] = curr_model
+                filtered[curr_model["id"]] = curr_model
             else:
-                model_key = (
-                    str(curr_model["id"]).lower()
-                )
+                model_key = str(curr_model["id"]).lower()
                 for curr_filter in filters:
                     if (
                         curr_filter.lower() in curr_model["name"].lower()
@@ -124,12 +132,10 @@ class Downloader(QObject):
                         or curr_filter.lower() in curr_model["nickname"].lower()
                         or curr_filter.lower() in model_key
                     ):
-                        filtered[
-                            curr_model["id"]
-                        ] = curr_model
+                        filtered[curr_model["id"]] = curr_model
                         break
         return filtered
-        
+
     def refresh(
         self,
     ):
@@ -239,7 +245,9 @@ class QtModelListItem(QFrame):
             self.row1.addStretch()
 
         self.ui_nickname = QLabel(self)
-        self.ui_nickname.setAlignment(Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
+        self.ui_nickname.setAlignment(
+            Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter
+        )
         self.row1.addWidget(self.ui_nickname)
 
         if self.model_versions:
@@ -249,10 +257,17 @@ class QtModelListItem(QFrame):
             self.row1.addStretch()
             self.row1.addWidget(QLabel("version:"))
             self.row1.addWidget(self.ui_versions)
+
             def change_version(index):
                 # Replace the active version id
-                self.model_info["id"] =  "/".join(self.model_info["id"].split('/')[:2] + [self.model_versions[index], ])
+                self.model_info["id"] = "/".join(
+                    self.model_info["id"].split("/")[:2]
+                    + [
+                        self.model_versions[index],
+                    ]
+                )
                 print("Switched to model version: " + self.model_info["id"])
+
             self.ui_versions.currentIndexChanged.connect(change_version)
 
         self.action_button = QPushButton(self)
@@ -292,9 +307,7 @@ class QtModelList(QListWidget):
         model_info,
         downloaded,
     ):
-        item = QListWidgetItem(
-            str(model_info["id"]), parent=self
-        )
+        item = QListWidgetItem(str(model_info["id"]), parent=self)
         super().addItem(item)
         widg = QtModelListItem(
             model_info,
@@ -306,21 +319,15 @@ class QtModelList(QListWidget):
         item.widget = widg
         action_name = "remove" if downloaded == 2 else "download"
         widg.action_button.clicked.connect(
-            lambda: self.handle_action(
-                item, model_info, action_name
-            )
+            lambda: self.handle_action(item, model_info, action_name)
         )
         if downloaded == 2:
             widg.inspect_icon.clicked.connect(
-                lambda: self.handle_action(
-                    item, model_info, "inspect"
-                )
+                lambda: self.handle_action(item, model_info, "inspect")
             )
         if downloaded == 2 and self.select_mode:
             widg.selection_button.clicked.connect(
-                lambda: self.handle_action(
-                    item, model_info, "select"
-                )
+                lambda: self.handle_action(item, model_info, "select")
             )
         item.setSizeHint(widg.sizeHint())
         self.setItemWidget(item, widg)
@@ -395,9 +402,12 @@ class QtBioImageIOModelManager(QDialog):
             )
 
         for curr_model_key in self.worker.ready_to_download:
-            download_option = 1 if curr_model_key in self.worker.already_downloaded else 0
+            download_option = (
+                1 if curr_model_key in self.worker.already_downloaded else 0
+            )
             self.available_list.addItem(
-                self.worker.ready_to_download[curr_model_key], downloaded=download_option
+                self.worker.ready_to_download[curr_model_key],
+                downloaded=download_option,
             )
         self.working_indicator.hide()
         if self.worker.exit_code == -1:
@@ -492,8 +502,7 @@ class QtBioImageIOModelManager(QDialog):
 
         self.v_splitter.setStretchFactor(1, 2)
         self.h_splitter.setStretchFactor(0, 2)
-        
-        
+
         if self.filter:
             self.filterText.setText(self.filter)
             self.filterText.setReadOnly(True)
@@ -522,13 +531,14 @@ def show_model_selector(filter=None):
     d.exec_()
     return d.selected
 
+
 def show_model_manager():
     d = QtBioImageIOModelManager(select_mode=False)
     d.setObjectName("QtBioImageIOModelManager")
     d.setWindowTitle("BioImageIO Model Manager")
     d.setWindowModality(Qt.ApplicationModal)
     d.exec_()
-    
+
 
 def show_model_uploader():
     msg = QMessageBox()

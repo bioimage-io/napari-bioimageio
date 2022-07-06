@@ -164,13 +164,15 @@ class QtBioImageIOHPA(QDialog):
         modelsTitle_label = QLabel("Models:")
         modelsTitleBox.addWidget(modelsTitle_label)
         modelsTitleBox.addStretch()
-        
+
         manager_btn = QPushButton("Show Models")
+
         def show_models():
             show_model_manager()
+
         manager_btn.clicked.connect(show_models)
         modelsTitleBox.addWidget(manager_btn)
-        
+
         modelsTitleBox.setContentsMargins(10, 15, 10, 0)
         self.layout.addLayout(modelsTitleBox)
 
@@ -200,7 +202,7 @@ class QtBioImageIOHPA(QDialog):
         celseg_label = QLabel("Cell segmentation:")
         self.celseg_value = QLabel(self.celseg_id)
         celseg_value_btn = QPushButton("Select")
-        
+
         def select_model():
             model_info = show_model_selector(filter=cell_segmentation_model_filter)
             if model_info:
@@ -290,7 +292,9 @@ class QtBioImageIOHPA(QDialog):
         run_nucleus_model = bioimageio.core.load_resource_description(
             self.nucseg_model_source
         )
-        run_cell_model = bioimageio.core.load_resource_description(self.celseg_model_source)
+        run_cell_model = bioimageio.core.load_resource_description(
+            self.celseg_model_source
+        )
         run_classification_model = bioimageio.core.load_resource_description(
             self.classi_model_source
         )

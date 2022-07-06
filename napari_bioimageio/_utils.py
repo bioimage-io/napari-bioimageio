@@ -105,7 +105,7 @@ def get_downloaded_models() -> typing.List[typing.Dict[str, str]]:
                 "versions": [model_info.id[(model_info.id.rfind("/") + 1) :]],
                 "description": model_info.description,
                 "id": model_info.id,
-                "rdf_source": str(os.path.abspath(file)), 
+                "rdf_source": str(os.path.abspath(file)),
                 # "version": model_info.id[(model_info.id.rfind("/") + 1) :],
                 "tags": ",".join(model_info.tags),
                 "nickname": model_info.config["bioimageio"]["nickname"]
@@ -134,10 +134,7 @@ def download_model(model_id: str, overwrite: bool) -> typing.Any:
         String in YAML format with the full model information
     """
     models_directory = get_models_path()
-    model_download_folder = os.path.join(
-        models_directory,
-        str(model_id)
-    )
+    model_download_folder = os.path.join(models_directory, str(model_id))
     destination_file = os.path.join(model_download_folder, "model.zip")
     yaml_file = os.path.join(model_download_folder, "rdf.yaml")
     if os.path.exists(model_download_folder):
@@ -148,7 +145,9 @@ def download_model(model_id: str, overwrite: bool) -> typing.Any:
 
     os.makedirs(model_download_folder)
     resource_description = str(model_id)
-    bioimageio.core.export_resource_package(resource_description, output_path=destination_file)
+    bioimageio.core.export_resource_package(
+        resource_description, output_path=destination_file
+    )
     with zipfile.ZipFile(destination_file, "r") as zip_ref:
         zip_ref.extractall(model_download_folder)
     os.remove(destination_file)
