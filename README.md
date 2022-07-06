@@ -21,13 +21,9 @@ Show the model manager with a model list pulled from the BioImage Model Zoo, the
 Display a dialog for selecting models from the BioImage Model Zoo, the user can either select an existing model or download from the BioImage Model Zoo.
 
 The selecte model information (a dictionary) will be returned if the user selected a model, otherwise it returns `None`.
-### `show_model_uploader()`
 
-Display a dialog to instruct the user to upload a model to the BioImage Model Zoo.
-Currently, it only shows a message, in the future, we will try to support direct uploading with user's credentials obtained from Zenodo (a public data repository used by the BioImage Model Zoo to store models).
+Once the user selected the model, you can access the name, and also the file path to the model resource description file (via the `rdf_source` key). With the `bioimageio.core` library (installed via `pip install bioimageio.core` or `conda install -c conda-forge bioimageio.core`), you can run inference directly, the following examples shows how to implement it:
 
-
-### Example usage
 ```python
 # Popup a model selection dialog for choosing the model
 model_info = show_model_selector(filter=nuclear_segmentation_model_filter)
@@ -45,6 +41,14 @@ if model_info:
         pipeline, input_image, padding=padding
     )
 ```
+
+For more examples, see [this example notebook](https://github.com/bioimage-io/core-bioimage-io-python/blob/main/example/bioimageio-core-usage.ipynb) for `bioimageio.core`.
+### `show_model_uploader()`
+Display a dialog to instruct the user to upload a model package to the BioImage Model Zoo.
+Currently, it only shows a message, in the future, we will try to support direct uploading with user's credentials obtained from Zenodo (a public data repository used by the BioImage Model Zoo to store models).
+
+To create a BioImageIO-compatible model package, you can use the `build_model` function as demonstrated in [this notebook]((https://github.com/bioimage-io/core-bioimage-io-python/blob/main/example/bioimageio-core-usage.ipynb)).
+
 ## Development
 
 - Install and set up development environment.
