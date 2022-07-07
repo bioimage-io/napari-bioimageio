@@ -2,10 +2,9 @@
 
 napari plugin for managing AI models in the [BioImage Model Zoo](https://bioimage.io).
 
-![](assets/screenshot-model-manager-1.png)
-
 > **WARNING**: This is an alpha release. The API may change in future versions, and please feel free to create issues to report bugs or provide feedbacks.
 
+![](assets/screenshot-model-manager-1.png)
 
 ## Installation
 
