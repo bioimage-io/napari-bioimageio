@@ -83,7 +83,7 @@ classification_model_filter = "10.5281/zenodo.5910854"
 custom_style = get_stylesheet("dark")
 
 
-class QtBioImageIOHPA(QDialog):
+class QTHPASingleCell(QDialog):
     def __init__(self, viewer: "napari.viewer.Viewer"):
         super().__init__()
         self._viewer = viewer

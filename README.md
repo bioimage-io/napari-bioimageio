@@ -1,6 +1,10 @@
-# napari-bioimage-io
+# napari-bioimageio
 
-napari plugin for managing AI models in the BioImage Model Zoo.
+napari plugin for managing AI models in the [BioImage Model Zoo](https://bioimage.io).
+
+> **WARNING**: This is an alpha release. The API may change in future versions, and please feel free to create issues to report bugs or provide feedbacks.
+
+![](assets/screenshot-model-manager-1.png)
 
 ## Installation
 
@@ -15,7 +19,6 @@ pip install napari-bioimageio
 This library is meant for helping developers to ease the handling of models in napari.
 
 We provide a set of API functions for managing and selecting models.
-
 ### `show_model_manager()`
 Show the model manager with a model list pulled from the BioImage Model Zoo, the user can explore all the available models, download or remove models.
 
@@ -43,6 +46,7 @@ if model_info:
         pipeline, input_image, padding=padding
     )
 ```
+Note: To run the models, you need to setup the conda environment properly according to the [installation guide of bioimageio.core](https://github.com/bioimage-io/core-bioimage-io-python#installation).
 
 For more examples, see [this example notebook](https://github.com/bioimage-io/core-bioimage-io-python/blob/main/example/bioimageio-core-usage.ipynb) for `bioimageio.core`.
 

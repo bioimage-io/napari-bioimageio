@@ -6,6 +6,6 @@ This plugin demonstrate how to use the bioimageio model manager to fetch and run
 ## Installation
 
 ```
-cd examples/bioimageio-hpa
+cd examples/hpa-single-cell
 pip install .
 ```
