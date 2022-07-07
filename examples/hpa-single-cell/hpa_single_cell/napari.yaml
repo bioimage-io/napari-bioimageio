@@ -1,0 +1,12 @@
+name: hpa-single-cell
+display_name: HPA Single Cell
+
+contributions:
+  commands:
+  - id: hpa-single-cell.QTHPASingleCell
+    python_name: hpa_single_cell._bhpa:QTHPASingleCell
+    title: HPA Single Cell
+
+  widgets:
+  - command: hpa-single-cell.QTHPASingleCell
+    display_name: HPA Single Cell
