@@ -429,11 +429,23 @@ class QtBioImageIOModelManager(QDialog):
             d.exec_()
 
     def setup_ui(self):
-        self.resize(1080, 525)
+        self.resize(1080, 825)
 
         vlay_1 = QVBoxLayout(self)
 
         folderBox = QHBoxLayout()
+        logo_file = os.path.join(
+            os.path.dirname(__file__), "bioimage-io-logo-white.png"
+        )
+        # TODO: Deal with light theme
+        logo_label = QLabel(f'<img src="{logo_file}">')
+        folderBox.addWidget(logo_label)
+        folderBox.addSpacing(10)
+        folderBox.addStretch()
+        vlay_1.addLayout(folderBox)
+
+        folderBox = QHBoxLayout()
+
         modfol_label = QLabel("Models folder:")
         self.modfol_value = QLabel(self.models_folder)
         modfol_folder_btn = QPushButton("Change")
@@ -450,6 +462,7 @@ class QtBioImageIOModelManager(QDialog):
         mov.setScaledSize(QSize(18, 18))
         self.working_indicator.setMovie(mov)
         mov.start()
+
         folderBox.addWidget(modfol_label)
         folderBox.addSpacing(10)
         folderBox.addWidget(self.modfol_value)
@@ -487,6 +500,7 @@ class QtBioImageIOModelManager(QDialog):
         mid_layout.addStretch()
         lay.addLayout(mid_layout)
         self.downloaded_list = QtModelList(downloaded, self, self.select_mode)
+        self.downloaded_list.setFixedHeight(250)
         lay.addWidget(self.downloaded_list)
 
         available = QWidget(self.v_splitter)
@@ -498,6 +512,7 @@ class QtBioImageIOModelManager(QDialog):
         mid_layout.addStretch()
         lay.addLayout(mid_layout)
         self.available_list = QtModelList(available, self, False)
+        self.available_list.setFixedHeight(250)
         lay.addWidget(self.available_list)
 
         self.v_splitter.setStretchFactor(1, 2)
