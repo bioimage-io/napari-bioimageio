@@ -25,13 +25,13 @@ Show the model manager with a model list pulled from the BioImage Model Zoo, the
 ### `show_model_selector(filter=None)`
 Display a dialog for selecting models from the BioImage Model Zoo, the user can either select an existing model or download from the BioImage Model Zoo.
 
-The selecte model information (a dictionary) will be returned if the user selected a model, otherwise it returns `None`.
+The selected model information (a dictionary) will be returned if the user selected a model, otherwise it returns `None`.
 
 Once the user selected the model, you can access the name, and also the file path to the model resource description file (via the `rdf_source` key). With the `bioimageio.core` library (installed via `pip install bioimageio.core` or `conda install -c conda-forge bioimageio.core`), you can run inference directly, the following examples shows how to implement it:
 
 ```python
 # Popup a model selection dialog for choosing the model
-model_info = show_model_selector(filter=nuclear_segmentation_model_filter)
+model_info = show_model_selector(filter=None)
 
 if model_info:
   self.nucseg_model_source = model_info["rdf_source"]
