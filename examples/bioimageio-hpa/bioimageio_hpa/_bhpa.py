@@ -117,7 +117,7 @@ class QtBioImageIOHPA(QDialog):
         self.cb_1 = QComboBox()
         for curr_layer in self._viewer.layers:
             self.cb_1.addItem(curr_layer.name)
-        self.cb_1.addItem("None")
+        self.cb_1.addItem("nuclei")
         image1Box.addWidget(image1_label, 3)
         image1Box.addWidget(self.cb_1, 7)
         image1Box.addStretch()
@@ -129,7 +129,7 @@ class QtBioImageIOHPA(QDialog):
         self.cb_2 = QComboBox()
         for curr_layer in self._viewer.layers:
             self.cb_2.addItem(curr_layer.name)
-        self.cb_2.addItem("None")
+        self.cb_2.addItem("microtubules")
         image2Box.addWidget(image2_label, 3)
         image2Box.addWidget(self.cb_2, 7)
         image2Box.addStretch()
@@ -141,7 +141,7 @@ class QtBioImageIOHPA(QDialog):
         self.cb_3 = QComboBox()
         for curr_layer in self._viewer.layers:
             self.cb_3.addItem(curr_layer.name)
-        self.cb_3.addItem("None")
+        self.cb_3.addItem("er")
         image3Box.addWidget(image3_label, 3)
         image3Box.addWidget(self.cb_3, 7)
         image3Box.addStretch()
@@ -153,7 +153,7 @@ class QtBioImageIOHPA(QDialog):
         self.cb_4 = QComboBox()
         for curr_layer in self._viewer.layers:
             self.cb_4.addItem(curr_layer.name)
-        self.cb_4.addItem("None")
+        self.cb_4.addItem("protein")
         image4Box.addWidget(image4_label, 3)
         image4Box.addWidget(self.cb_4, 7)
         image4Box.addStretch()
