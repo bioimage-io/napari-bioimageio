@@ -494,7 +494,7 @@ class QtBioImageIOModelManager(QDialog):
         downloaded = QWidget(self.v_splitter)
         lay = QVBoxLayout(downloaded)
         lay.setContentsMargins(0, 2, 0, 2)
-        self.downloaded_label = QLabel("downloaded models:")
+        self.downloaded_label = QLabel("Downloaded models:")
         mid_layout = QHBoxLayout()
         mid_layout.addWidget(self.downloaded_label)
         mid_layout.addStretch()
