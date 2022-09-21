@@ -182,11 +182,11 @@ class QTHPASingleCell(QDialog):
         nucseg_value_btn = QPushButton("Select")
 
         def select_model():
-            model_info = show_model_selector(filter=nuclear_segmentation_model_filter)
+            model_info = show_model_selector(filter_id=nuclear_segmentation_model_filter)
             if model_info:
                 self.nucseg_model_source = model_info["rdf_source"]
-                self.nucseg_id = model_info["nickname"]
-                self.nucseg_value.setText(model_info["nickname"])
+                self.nucseg_id = model_info["config"]["bioimageio"]["nickname"]
+                self.nucseg_value.setText(model_info["config"]["bioimageio"]["nickname"])
 
         nucseg_value_btn.clicked.connect(select_model)
         nucsegBox.addWidget(nucseg_label)
@@ -204,11 +204,11 @@ class QTHPASingleCell(QDialog):
         celseg_value_btn = QPushButton("Select")
 
         def select_model():
-            model_info = show_model_selector(filter=cell_segmentation_model_filter)
+            model_info = show_model_selector(filter_id=cell_segmentation_model_filter)
             if model_info:
                 self.celseg_model_source = model_info["rdf_source"]
-                self.celseg_id = model_info["nickname"]
-                self.celseg_value.setText(model_info["nickname"])
+                self.celseg_id = model_info["config"]["bioimageio"]["nickname"]
+                self.celseg_value.setText(model_info["config"]["bioimageio"]["nickname"])
 
         celseg_value_btn.clicked.connect(select_model)
         celsegBox.addWidget(celseg_label)
@@ -226,11 +226,11 @@ class QTHPASingleCell(QDialog):
         classi_value_btn = QPushButton("Select")
 
         def select_model():
-            model_info = show_model_selector(filter=classification_model_filter)
+            model_info = show_model_selector(filter_id=classification_model_filter)
             if model_info:
                 self.classi_model_source = model_info["rdf_source"]
-                self.classi_id = model_info["nickname"]
-                self.classi_value.setText(model_info["nickname"])
+                self.classi_id = model_info["config"]["bioimageio"]["nickname"]
+                self.classi_value.setText(model_info["config"]["bioimageio"]["nickname"])
 
         classi_value_btn.clicked.connect(select_model)
         classiBox.addWidget(classi_label)

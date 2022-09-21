@@ -22,7 +22,7 @@ We provide a set of API functions for managing and selecting models.
 ### `show_model_manager()`
 Show the model manager with a model list pulled from the BioImage Model Zoo, the user can explore all the available models, download or remove models.
 
-### `show_model_selector(filter=None)`
+### `show_model_selector(filter_id=None, filter_tag=None)`
 Display a dialog for selecting models from the BioImage Model Zoo, the user can either select an existing model or download from the BioImage Model Zoo.
 
 The selected model information (a dictionary) will be returned if the user selected a model, otherwise it returns `None`.
@@ -31,7 +31,7 @@ Once the user selected the model, you can access the name, and also the file pat
 
 ```python
 # Popup a model selection dialog for choosing the model
-model_info = show_model_selector(filter=None)
+model_info = show_model_selector(filter_id=None, filter_tag=None)
 
 if model_info:
   self.nucseg_model_source = model_info["rdf_source"]
