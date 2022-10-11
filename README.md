@@ -59,6 +59,30 @@ Currently, it only shows a message, in the future, we will try to support direct
 
 To create a BioImageIO-compatible model package, you can use the `build_model` function as demonstrated in [this notebook]((https://github.com/bioimage-io/core-bioimage-io-python/blob/main/example/bioimageio-core-usage.ipynb)).
 
+
+## Testing
+
+When developing napari plugins using napari-bioimageio, it is important to setup the tests in order to make sure your plugin and models will work during the development cycles.
+
+To facilitate the creation of tests with napari plugins that produce or consume bioimage.io-compatible models, we provide the command line tools and api functions to help you validate the test run the models.
+
+With `bioimageio.core` (installed via `pip install bioimageio.core`), you can use the command line to test a model produced from your napari plugin:
+```
+bioimageio test-model <MODEL>
+```
+This command will load the test data provided by the model, run it to produce the output and compare it against the provided outputs, if not matched, an error will be thrown. For other command line options, please refer to [here](https://github.com/bioimage-io/core-bioimage-io-python#command-line).
+
+For more flexible testing of the models and plugins, you can use the inference api provided by the `bioimageio.core`, see [this notebook](https://github.com/bioimage-io/core-bioimage-io-python/blob/main/example/bioimageio-core-usage.ipynb) for more examples.
+
+Alternatively, you can also use the pure model spec validator to perform static check for the model package, this can be done via the [`bioimageio.spec`](https://github.com/bioimage-io/spec-bioimage-io#bioimageiospec-python-package) module (installed via `pip install bioimageio.spec`). Note that this will only allow partial validation for the file itself, it does not provide guarantee for the model itself.
+
+## Contribution guidelines
+Please the the [issue tracker](https://github.com/bioimage-io/napari-bioimageio/issues) to report bugs or propose new features, if you are a developer, feel free to send us pull requests via Github.
+
+Learn how to build napari plugins, see the [napari plugin documentation](https://napari.org/stable/plugins/index.html#how-to-build-plugins).
+
+To contribute models to the bioimage model zoo, see [here](https://bioimage.io/docs/#/contribute_models/README).
+
 ## Development
 
 - Install and set up development environment.
