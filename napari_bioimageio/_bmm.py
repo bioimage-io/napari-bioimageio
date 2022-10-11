@@ -385,6 +385,7 @@ class QtBioImageIOModelManager(QDialog):
         if self.RUNNING == False:
             if action_name == "select":
                 self.selected = model_info
+                self.selected_version = selected_version
                 self.close()
                 return
 
@@ -631,7 +632,7 @@ def show_model_selector(filter_id=None, filter_tag=None):
     d.setWindowTitle("BioImageIO Model Selector")
     d.setWindowModality(Qt.ApplicationModal)
     d.exec_()
-    return d.selected
+    return d.selected, d.selected_version
 
 
 def show_model_manager():
@@ -650,3 +651,6 @@ def show_model_uploader():
     # msg.setDetailedText("The details are as follows:")
     msg.setStandardButtons(QMessageBox.Ok)
     msg.exec_()
+
+def load_model_by_id(model_id):
+    return _utils.load_model(model_id)

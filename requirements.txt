@@ -1,2 +1,2 @@
-bioimageio.core==0.5.1
-PyYAML==6.0
+bioimageio.core>=0.5.1
+PyYAML>=6.0

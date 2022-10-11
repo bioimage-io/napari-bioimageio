@@ -1,0 +1,12 @@
+name: live-cell-segmentation-boundary
+display_name: Live cell Segmentation and Boundary
+
+contributions:
+  commands:
+  - id: live-cell-segmentation-boundary.QTLiveCellSegBound
+    python_name: live_cell_segmentation_boundary._blivecellsegbound:QTLiveCellSegBound
+    title: Live cell Segmentation and Boundary
+
+  widgets:
+  - command: live-cell-segmentation-boundary.QTLiveCellSegBound
+    display_name: Live cell Segmentation and Boundary

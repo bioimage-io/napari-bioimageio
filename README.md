@@ -20,7 +20,9 @@ This library is meant for helping developers to ease the handling of models in n
 
 We provide a set of API functions for managing and selecting models.
 ### `show_model_manager()`
-Show the model manager with a model list pulled from the BioImage Model Zoo, the user can explore all the available models, download or remove models.
+Show the model manager with a model list pulled from the BioImage Model Zoo, the user can explore all the available models, download or remove models. 
+
+The model manager also offers the possibility to test the compliance of a local module in your machine: use the "Validate a model" button, select a model file in your local drive and a validation report will appear with the results.
 
 ### `show_model_selector(filter_id=None, filter_tag=None)`
 Display a dialog for selecting models from the BioImage Model Zoo, the user can either select an existing model or download from the BioImage Model Zoo.

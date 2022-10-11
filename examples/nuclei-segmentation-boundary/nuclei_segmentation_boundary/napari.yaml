@@ -1,0 +1,12 @@
+name: nuclei-segmentation-boundary
+display_name: Nuclei Segmentation and Boundary
+
+contributions:
+  commands:
+  - id: nuclei-segmentation-boundary.QTNucleiSegBound
+    python_name: nuclei_segmentation_boundary._bnucleisegbound:QTNucleiSegBound
+    title: Nuclei Segmentation and Boundary
+
+  widgets:
+  - command: nuclei-segmentation-boundary.QTNucleiSegBound
+    display_name: Nuclei Segmentation and Boundary

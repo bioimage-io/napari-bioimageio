@@ -1,0 +1,12 @@
+name: hpa-segmentation
+display_name: HPA Segmentation
+
+contributions:
+  commands:
+  - id: hpa-segmentation.QTHPASegmentation
+    python_name: hpa_segmentation._bhpaseg:QTHPASegmentation
+    title: HPA Segmentation
+
+  widgets:
+  - command: hpa-segmentation.QTHPASegmentation
+    display_name: HPA Segmentation
