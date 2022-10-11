@@ -1,0 +1,12 @@
+name: bioengine-app-demo
+display_name: BioEngine App Demo
+
+contributions:
+  commands:
+  - id: bioengine-app-demo.QTBioEngineApp
+    python_name: bioengine_app_demo._bioengine_app:QTBioEngineApp
+    title: BioEngine App Demo
+
+  widgets:
+  - command: bioengine-app-demo.QTBioEngineApp
+    display_name: BioEngine App Demo
