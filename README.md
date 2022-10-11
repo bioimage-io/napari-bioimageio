@@ -60,6 +60,10 @@ Currently, it only shows a message, in the future, we will try to support direct
 To create a BioImageIO-compatible model package, you can use the `build_model` function as demonstrated in [this notebook]((https://github.com/bioimage-io/core-bioimage-io-python/blob/main/example/bioimageio-core-usage.ipynb)).
 
 
+## Example plugins
+
+You can find example napari plugins in the [examples folder](https://github.com/bioimage-io/napari-bioimageio/tree/main/examples).
+
 ## Testing
 
 When developing napari plugins using napari-bioimageio, it is important to setup the tests in order to make sure your plugin and models will work during the development cycles.
