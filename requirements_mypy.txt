@@ -1,2 +1,2 @@
-mypy==0.950
+mypy==0.990
 types-PyYAML
