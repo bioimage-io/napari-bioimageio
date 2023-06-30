@@ -1,9 +1,10 @@
 import napari.resources
+import webbrowser
 from skimage.measure import label
 from skimage.io import imread
 from napari._qt.qt_resources import get_stylesheet
 from napari.utils.notifications import show_error as notify_error
-from .hypha_http_client import execute
+from imjoy_rpc.hypha import login_sync, connect_to_server_sync
 
 from qtpy.QtWidgets import (
     QComboBox,
@@ -26,9 +27,14 @@ class QTBioEngineApp(QDialog):
         self.image_layer = ""
         # self.cellseg_model_source = ""
         self.cellseg_id = "None"
-
+        self.token = None
         self.setup_ui()
 
+    def login(self):
+        def callback(context):
+            webbrowser.open_new(context["login_url"])
+        self.token = login_sync({"server_url": "https://ai.imjoy.io", "login_callback": callback})
+        
     def setup_ui(self):
         self.layout = QVBoxLayout()
 
@@ -43,7 +49,7 @@ class QTBioEngineApp(QDialog):
         test_image_btn = QPushButton("Load test image")
 
         def load_test_image():
-            test_image = imread('https://zenodo.org/api/files/8e1dc6e7-bdc9-412c-b06c-e79ee375989f/sample_input_0.tif')
+            test_image = imread('https://zenodo.org/api/files/61da5c68-e09b-49a6-899b-94c22cdfc4d9/sample_input_0.tif')
             v = self._viewer
             v.add_image(test_image)
             self.cb.addItem("test_image")
@@ -58,6 +64,14 @@ class QTBioEngineApp(QDialog):
         imageBox.setContentsMargins(10, 10, 10, 0)
         self.layout.addLayout(imageBox)
 
+        loginBox = QHBoxLayout()
+        self.login_btn = QPushButton("Login")
+        self.login_btn.setObjectName("login_button")
+        self.login_btn.clicked.connect(self.login)
+        loginBox.addWidget(self.login_btn)
+        loginBox.setContentsMargins(10, 20, 10, 10)
+        self.layout.addLayout(loginBox)
+        
         runBox = QHBoxLayout()
         self.run_btn = QPushButton("Run")
         self.run_btn.setObjectName("install_button")
@@ -83,10 +97,11 @@ class QTBioEngineApp(QDialog):
 
         assert len(np_img.shape) == 4
 
-        kwargs = {"inputs": [np_img], "model_id": "10.5281/zenodo.5869899"}
-        ret = execute(
+        kwargs = {"inputs": [np_img], "model_id": "10.5281/zenodo.5764892"}
+        server = connect_to_server_sync({"server_url": "https://ai.imjoy.io", "token": self.token})
+        svc = server.get_service("triton-client")
+        ret = svc.execute(
             inputs=[kwargs],
-            server_url="https://ai.imjoy.io",
             model_name="bioengine-model-runner",
             serialization="imjoy",
         )
