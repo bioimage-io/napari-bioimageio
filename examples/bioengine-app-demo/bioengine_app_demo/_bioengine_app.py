@@ -4,7 +4,7 @@ from skimage.measure import label
 from skimage.io import imread
 from napari._qt.qt_resources import get_stylesheet
 from napari.utils.notifications import show_error as notify_error
-from imjoy_rpc.hypha import login_sync, connect_to_server_sync
+from imjoy_rpc.hypha.sync import login, connect_to_server
 
 from qtpy.QtWidgets import (
     QComboBox,
@@ -30,10 +30,10 @@ class QTBioEngineApp(QDialog):
         self.token = None
         self.setup_ui()
 
-    def login(self):
+    def login_server(self):
         def callback(context):
             webbrowser.open_new(context["login_url"])
-        self.token = login_sync({"server_url": "https://ai.imjoy.io", "login_callback": callback})
+        self.token = login({"server_url": "https://ai.imjoy.io", "login_callback": callback})
         
     def setup_ui(self):
         self.layout = QVBoxLayout()
@@ -67,7 +67,7 @@ class QTBioEngineApp(QDialog):
         loginBox = QHBoxLayout()
         self.login_btn = QPushButton("Login")
         self.login_btn.setObjectName("login_button")
-        self.login_btn.clicked.connect(self.login)
+        self.login_btn.clicked.connect(self.login_server)
         loginBox.addWidget(self.login_btn)
         loginBox.setContentsMargins(10, 20, 10, 10)
         self.layout.addLayout(loginBox)
@@ -98,7 +98,7 @@ class QTBioEngineApp(QDialog):
         assert len(np_img.shape) == 4
 
         kwargs = {"inputs": [np_img], "model_id": "10.5281/zenodo.5764892"}
-        server = connect_to_server_sync({"server_url": "https://ai.imjoy.io", "token": self.token})
+        server = connect_to_server({"server_url": "https://ai.imjoy.io", "token": self.token})
         svc = server.get_service("triton-client")
         ret = svc.execute(
             inputs=[kwargs],
