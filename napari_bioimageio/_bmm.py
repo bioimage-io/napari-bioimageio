@@ -3,7 +3,7 @@ from pathlib import Path
 
 import napari.resources
 from napari._qt.qt_resources import QColoredSVGIcon, get_stylesheet
-from qtpy.QtCore import QObject, QSize, Qt, QThread, Signal
+from qtpy.QtCore import QObject, QSize, Qt, QThread, Signal, QEvent
 from qtpy.QtGui import QFont, QMovie
 from qtpy.QtWidgets import (
     QAction,
@@ -26,7 +26,8 @@ from qtpy.QtWidgets import (
     QMessageBox,
 )
 from superqt import QElidingLabel
-
+from ._inference import run_inference
+from magicgui import magicgui
 from . import _utils
 
 # TODO find a proper way to import style from napari
@@ -302,6 +303,10 @@ class QtModelListItem(QFrame):
             inspectAction.triggered.connect(lambda: self.handle_action(self.model_info, "inspect"))
             action_menu.addAction(inspectAction)
 
+            applyAction = QAction('Apply', self)
+            applyAction.triggered.connect(lambda: self.handle_action(self.model_info, "apply"))
+            action_menu.addAction(applyAction)
+
             if self.select_mode:
                 selectAction = QAction('Select', self)
                 selectAction.triggered.connect(lambda: self.handle_action(self.model_info, "select"))
@@ -341,6 +346,15 @@ class QtModelListItem(QFrame):
             self.parent.ui_parent.run_thread("inspect", model_info, self.selected_version)
         elif action_name == "select":
             self.parent.ui_parent.run_thread("select", model_info, self.selected_version)
+        elif action_name == "apply":
+            from functools import partial
+            run_inference_partial = partial(
+                run_inference,
+                rdf_path=model_info["id"])
+            widget = magicgui(run_inference_partial)
+            run_inference_partial.__name__ = model_info["name"] + ' predictor'
+            self.viewer.window.add_dock_widget(widget, area='right')
+
 
 class QtModelList(QListWidget):
     def __init__(self, parent, ui_parent, select_mode, napari_viewer: 'napari.viewer.Viewer' = None):
