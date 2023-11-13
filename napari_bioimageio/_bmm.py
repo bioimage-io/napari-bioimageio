@@ -208,6 +208,7 @@ class QtModelListItem(QFrame):
         downloaded,
         parent: QWidget = None,
         select_mode=False,
+        napari_viewer: 'napari.viewer.Viewer' = None
     ):
         super().__init__(parent)
         self.parent = parent
@@ -217,6 +218,7 @@ class QtModelListItem(QFrame):
         self.selected_version = versions[0]
         self.model_name = model_info["name"]
         self.model_description = model_info["description"]
+        self.viewer = napari_viewer
         nickname_icon = ''
         if "nickname_icon" in model_info:
             nickname_icon = model_info["nickname_icon"]
@@ -341,11 +343,12 @@ class QtModelListItem(QFrame):
             self.parent.ui_parent.run_thread("select", model_info, self.selected_version)
 
 class QtModelList(QListWidget):
-    def __init__(self, parent, ui_parent, select_mode):
+    def __init__(self, parent, ui_parent, select_mode, napari_viewer: 'napari.viewer.Viewer' = None):
         super().__init__(parent)
         self.ui_parent = ui_parent
         self.select_mode = select_mode
         self.setSortingEnabled(True)
+        self.viewer = napari_viewer
 
     def addItem(
         self,
@@ -361,6 +364,7 @@ class QtModelList(QListWidget):
             downloaded=downloaded,
             parent=self,
             select_mode=self.select_mode,
+            napari_viewer=self.viewer
         )
 
         item.widget = widg
@@ -368,7 +372,12 @@ class QtModelList(QListWidget):
         self.setItemWidget(item, widg)
 
 class QtBioImageIOModelManager(QDialog):
-    def __init__(self, parent=None, filter_id=None, filter_tag=None, select_mode=False):
+    def __init__(self,
+                 parent=None,
+                 filter_id=None,
+                 filter_tag=None,
+                 select_mode=False,
+                 napari_viewer='napari.viewer.Viewer'):
         super().__init__(parent)
         self.setStyleSheet(custom_style)
         self.models_folder = _utils.get_models_path()
@@ -377,6 +386,7 @@ class QtBioImageIOModelManager(QDialog):
         self.RUNNING = False
         self.select_mode = select_mode
         self.selected = None
+        self.viewer = napari_viewer
         self.filter_id = filter_id
         self.filter_tag = filter_tag
         self.setup_ui()
@@ -572,7 +582,7 @@ class QtBioImageIOModelManager(QDialog):
         mid_layout.addWidget(self.downloaded_label)
         mid_layout.addStretch()
         lay.addLayout(mid_layout)
-        self.downloaded_list = QtModelList(downloaded, self, self.select_mode)
+        self.downloaded_list = QtModelList(downloaded, self, self.select_mode, napari_viewer=self.viewer)
         self.downloaded_list.setFixedHeight(250)
         lay.addWidget(self.downloaded_list)
 
@@ -584,7 +594,7 @@ class QtBioImageIOModelManager(QDialog):
         mid_layout.addWidget(self.avail_label)
         mid_layout.addStretch()
         lay.addLayout(mid_layout)
-        self.available_list = QtModelList(available, self, False)
+        self.available_list = QtModelList(available, self, False, napari_viewer=self.viewer)
         self.available_list.setFixedHeight(250)
         lay.addWidget(self.available_list)
 
@@ -626,8 +636,8 @@ class QtBioImageIOModelManager(QDialog):
             self.run_thread("validate")
 
 
-def show_model_selector(filter_id=None, filter_tag=None):
-    d = QtBioImageIOModelManager(filter_id=filter_id, filter_tag=filter_tag, select_mode=True)
+def show_model_selector(filter_id=None, filter_tag=None, viewer: 'napari.viewer.Viewer' = None):
+    d = QtBioImageIOModelManager(filter_id=filter_id, filter_tag=filter_tag, select_mode=True, napari_viewer=viewer)
     d.setObjectName("QtBioImageIOModelManager")
     d.setWindowTitle("BioImageIO Model Selector")
     d.setWindowModality(Qt.ApplicationModal)
